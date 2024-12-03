@@ -28,6 +28,18 @@ module Payola
       end
     end
 
+    initializer :inject_template_helper_patch do
+      ActiveSupport.on_load(:action_mailer) do
+        unless ActionMailer::Base.method_defined?(:add_template_helper)
+          ActionMailer::Base.class_eval do
+            def self.add_template_helper(helper_module)
+              helper(helper_module)
+            end
+          end
+        end
+      end
+    end
+
     initializer :configure_subscription_listeners do |app|
       Payola.configure do |config|
         config.subscribe 'invoice.payment_succeeded',     Payola::InvoicePaid
